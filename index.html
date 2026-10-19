@@ -1,1 +1,773 @@
-placeholder
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="GI速查表">
+<link rel="manifest" href="manifest.json">
+<meta name="mobile-web-app-capable" content="yes">
+<title>GI & GL 速查表 + 低GI晚餐</title>
+<style>
+:root {
+  --bg: #f8f9fa;
+  --card: #ffffff;
+  --text: #212529;
+  --muted: #6c757d;
+  --border: #dee2e6;
+  --low: #198754;
+  --med: #ffc107;
+  --high: #dc3545;
+  --low-bg: #d1e7dd;
+  --med-bg: #fff3cd;
+  --high-bg: #f8d7da;
+  --accent: #0d6efd;
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  margin: 0;
+  padding: 12px 12px calc(12px + var(--safe-bottom));
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+.container { max-width: 1400px; margin: 0 auto; }
+header {
+  text-align: center;
+  margin-bottom: 12px;
+  padding: 14px 12px;
+  background: var(--card);
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+h1 { margin: 0 0 6px; color: #0a58ca; font-size: 1.35rem; }
+.subtitle { color: var(--muted); font-size: 0.82rem; }
+.nav-tabs {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+.nav-tab {
+  padding: 10px 16px;
+  border: none;
+  border-radius: 10px;
+  background: white;
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: 600;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  min-height: 44px;
+}
+.nav-tab.active { background: var(--accent); color: white; }
+.page { display: none; }
+.page.active { display: block; }
+.disclaimer {
+  background: #e7f1ff;
+  border-left: 4px solid var(--accent);
+  padding: 10px 12px;
+  margin: 12px 0;
+  border-radius: 6px;
+  font-size: 0.8rem;
+}
+.controls { margin-bottom: 12px; }
+.search-row { margin-bottom: 10px; }
+input[type="text"] {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  font-size: 16px;
+  background: white;
+  min-height: 44px;
+}
+.filter-group { margin-bottom: 10px; }
+.filter-label { font-weight: 600; font-size: 0.85rem; margin-bottom: 6px; color: #495057; }
+.btn-row { display: flex; flex-wrap: wrap; gap: 6px; }
+.btn {
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: white;
+  cursor: pointer;
+  font-size: 0.82rem;
+  min-height: 36px;
+}
+.btn.active { background: var(--accent); color: white; border-color: var(--accent); }
+.btn.gi-low.active { background: var(--low); border-color: var(--low); }
+.btn.gi-med.active { background: #e0a800; border-color: #e0a800; color: #000; }
+.btn.gi-high.active { background: var(--high); border-color: var(--high); }
+.legend { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; font-size: 0.78rem; }
+.legend span { display: inline-flex; align-items: center; gap: 4px; }
+.dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+.section-title {
+  grid-column: 1 / -1;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #0a58ca;
+  margin: 16px 0 6px;
+  padding-bottom: 4px;
+  border-bottom: 2px solid #0d6efd;
+}
+.grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+.card {
+  background: var(--card);
+  border-radius: 10px;
+  padding: 10px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  border-top: 4px solid #ccc;
+  font-size: 0.82rem;
+}
+.card.low { border-top-color: var(--low); }
+.card.med { border-top-color: var(--med); }
+.card.high { border-top-color: var(--high); }
+.food-name { font-weight: 700; font-size: 0.92rem; margin-bottom: 2px; }
+.food-en { color: var(--muted); font-size: 0.7rem; margin-bottom: 4px; }
+.metrics { display: flex; gap: 4px; flex-wrap: wrap; margin: 4px 0; }
+.badge { padding: 2px 6px; border-radius: 10px; font-size: 0.68rem; font-weight: 600; }
+.gi-badge.low { background: var(--low-bg); color: #0f5132; }
+.gi-badge.med { background: var(--med-bg); color: #664d03; }
+.gi-badge.high { background: var(--high-bg); color: #842029; }
+.gl-badge { background: #e9ecef; color: #495057; }
+.category { font-size: 0.65rem; color: var(--muted); text-transform: uppercase; }
+.note { font-size: 0.65rem; color: var(--muted); margin-top: 2px; }
+.count { font-size: 0.8rem; color: var(--muted); margin-bottom: 8px; }
+
+/* Dinner page */
+.dinner-controls { text-align: center; margin: 16px 0; }
+.big-btn {
+  padding: 14px 20px;
+  font-size: 1rem;
+  font-weight: 700;
+  background: var(--low);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  min-height: 48px;
+  margin: 4px;
+}
+.big-btn:hover { background: #157347; }
+.meal-container { margin-top: 16px; }
+.dish {
+  background: white;
+  border-radius: 12px;
+  padding: 14px;
+  margin-bottom: 14px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  border-left: 5px solid var(--low);
+}
+.dish h3 { margin: 0 0 6px; color: #0a58ca; font-size: 1.05rem; }
+.dish .meta { color: var(--muted); font-size: 0.8rem; margin-bottom: 8px; }
+.dish h4 { margin: 10px 0 4px; font-size: 0.9rem; }
+.dish ul, .dish ol { margin: 4px 0; padding-left: 18px; }
+.dish li { margin: 3px 0; font-size: 0.88rem; }
+footer { margin-top: 24px; text-align: center; color: var(--muted); font-size: 0.75rem; padding: 12px; }
+
+/* Mobile optimizations */
+@media (min-width: 600px) {
+  .grid { grid-template-columns: repeat(3, 1fr); }
+  h1 { font-size: 1.6rem; }
+  body { padding: 16px; }
+}
+@media (min-width: 900px) {
+  .grid { grid-template-columns: repeat(5, 1fr); }
+}
+@media (max-width: 400px) {
+  .grid { grid-template-columns: 1fr; }
+  .nav-tab { padding: 8px 12px; font-size: 0.88rem; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>GI & GL 速查表</h1>
+    <div class="subtitle">香港食物 · 低GI中式晚餐（3人份）</div>
+  </header>
+
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="showPage('cheatsheet')">GI & GL 速查表</button>
+    <button class="nav-tab" onclick="showPage('dinner')">低GI 中式晚餐提議</button>
+  </div>
+
+  <!-- CHEATSHEET PAGE -->
+  <div id="page-cheatsheet" class="page active">
+    <div class="disclaimer">
+      <strong>免責聲明：</strong>數值為近似值，已對照台灣常見 GI 表（如 healthwomen / diabeteslive99）調整多項食物（白米、糙米、烏冬、根莖類、麵包等）。實際升糖反應因烹調方法、份量、搭配及個人而異。僅供參考。
+    </div>
+
+    <div class="controls">
+      <div class="search-row">
+        <input type="text" id="search" placeholder="搜尋食物名稱（中文或英文）..." oninput="filterFoods()">
+      </div>
+      <div class="filter-group">
+        <div class="filter-label">GI 篩選</div>
+        <div class="btn-row" id="giButtons">
+          <button class="btn active" data-gi="all" onclick="setGI('all')">全部</button>
+          <button class="btn gi-low" data-gi="low" onclick="setGI('low')">低 GI (≤55)</button>
+          <button class="btn gi-med" data-gi="med" onclick="setGI('med')">中 GI (56–69)</button>
+          <button class="btn gi-high" data-gi="high" onclick="setGI('high')">高 GI (≥70)</button>
+        </div>
+      </div>
+      <div class="filter-group">
+        <div class="filter-label">類別</div>
+        <div class="btn-row" id="catButtons">
+          <button class="btn active" data-cat="all" onclick="setCat('all')">全部</button>
+          <button class="btn" data-cat="grain" onclick="setCat('grain')">穀物</button>
+          <button class="btn" data-cat="noodles" onclick="setCat('noodles')">麵粉製品</button>
+          <button class="btn" data-cat="root" onclick="setCat('root')">根莖</button>
+          <button class="btn" data-cat="veg" onclick="setCat('veg')">蔬菜</button>
+          <button class="btn" data-cat="fruit" onclick="setCat('fruit')">水果</button>
+          <button class="btn" data-cat="soy" onclick="setCat('soy')">豆製品</button>
+          <button class="btn" data-cat="dairyegg" onclick="setCat('dairyegg')">奶蛋</button>
+          <button class="btn" data-cat="meat" onclick="setCat('meat')">肉類</button>
+          <button class="btn" data-cat="seafood" onclick="setCat('seafood')">海鮮</button>
+          <button class="btn" data-cat="nut" onclick="setCat('nut')">堅果種子</button>
+          <button class="btn" data-cat="drink" onclick="setCat('drink')">飲品</button>
+          <button class="btn" data-cat="other" onclick="setCat('other')">其他</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="legend">
+      <span><span class="dot" style="background:#198754"></span> 低 GI (≤55)</span>
+      <span><span class="dot" style="background:#ffc107"></span> 中 GI (56–69)</span>
+      <span><span class="dot" style="background:#dc3545"></span> 高 GI (≥70)</span>
+      <span>GL：低 ≤10 | 中 11–19 | 高 ≥20</span>
+    </div>
+
+    <div class="count" id="count"></div>
+    <div class="grid" id="foodGrid"></div>
+  </div>
+
+  <!-- DINNER PAGE -->
+  <div id="page-dinner" class="page">
+    <div class="disclaimer">
+      <strong>低 GI 中式晚餐（3人份 · 營養均衡 · 較低脂肪）：</strong>已按更新後的台灣常見 GI 表調整。避免或限制高 GI 食材（如烏冬、大量芋頭／淮山、玉米、熟紅蘿蔔等），優先選用低至中 GI 的蔬菜、魚、蝦、蛋、豆腐、瘦肉。主食建議少量糙米（GI約56）或藜麥。僅供參考。
+    </div>
+    <div class="dinner-controls">
+      <button class="big-btn" onclick="randomDinner()">隨機推薦今晚晚餐（2–3款菜）</button>
+      <button class="big-btn" style="background:#0d6efd; margin-left:10px;" onclick="generateShoppingList()">產生購物清單</button>
+      <p style="margin-top:8px; color:#6c757d; font-size:0.85rem;">已收錄多款低GI中式晚餐食譜，點擊即可隨機組合</p>
+    </div>
+    <div class="meal-container" id="mealContainer"></div>
+    <div class="meal-container" id="shoppingListContainer" style="display:none;"></div>
+  </div>
+
+  <footer>
+    數據綜合參考國際 GI 表及相關研究近似值 · 僅供教育參考
+  </footer>
+</div>
+
+<script>
+// ========== NAV ==========
+function showPage(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  event.currentTarget.classList.add('active');
+}
+
+// ========== CHEATSHEET DATA & LOGIC ==========
+const catNames = {
+  grain: "穀物", noodles: "麵粉製品", root: "根莖", veg: "蔬菜", fruit: "水果",
+  soy: "豆製品", dairyegg: "奶蛋", meat: "肉類", seafood: "海鮮",
+  nut: "堅果種子", drink: "飲品", other: "其他"
+};
+
+const foods = [
+  {name:"白米",en:"White Rice",gi:84,gl:23,cat:"grain",note:"台灣表約84"},
+  {name:"香米",en:"Jasmine Rice",gi:82,gl:26,cat:"grain"},
+  {name:"糙米",en:"Brown Rice",gi:56,gl:18,cat:"grain",note:"台灣表約56"},
+  {name:"紅米",en:"Red Rice",gi:70,gl:20,cat:"grain"},
+  {name:"黑米",en:"Black Rice",gi:50,gl:15,cat:"grain"},
+  {name:"糯米",en:"Glutinous Rice",gi:87,gl:40,cat:"grain"},
+  {name:"藜麥",en:"Quinoa",gi:53,gl:13,cat:"grain"},
+  {name:"燕麥",en:"Oats",gi:55,gl:13,cat:"grain"},
+  {name:"小米",en:"Millet",gi:71,gl:17,cat:"grain"},
+  {name:"大麥",en:"Barley",gi:28,gl:9,cat:"grain"},
+  {name:"蕎麥",en:"Buckwheat",gi:50,gl:12,cat:"grain"},
+  {name:"薏米",en:"Job's Tears",gi:35,gl:8,cat:"grain"},
+  {name:"白麵粉",en:"White Flour",gi:85,gl:20,cat:"noodles"},
+  {name:"全麥麵粉",en:"Wholemeal Flour",gi:45,gl:15,cat:"noodles",note:"台灣表全麥麵粉約45"},
+  {name:"澄麵",en:"Wheat Starch",gi:95,gl:25,cat:"noodles"},
+  {name:"粉絲（綠豆）",en:"Mung Bean Vermicelli",gi:28,gl:8,cat:"noodles"},
+  {name:"米粉",en:"Rice Vermicelli",gi:58,gl:18,cat:"noodles"},
+  {name:"河粉",en:"Ho Fun",gi:70,gl:35,cat:"noodles"},
+  {name:"烏冬",en:"Udon",gi:80,gl:15,cat:"noodles",note:"台灣表約80"},
+  {name:"意粉",en:"Spaghetti",gi:65,gl:20,cat:"noodles",note:"台灣表義大利麵約65"},
+  {name:"全麥麵條",en:"Whole Wheat Noodles",gi:50,gl:15,cat:"noodles"},
+  {name:"蕎麥麵",en:"Soba",gi:59,gl:14,cat:"noodles",note:"台灣表約59"},
+  {name:"白麵包",en:"White Bread",gi:91,gl:15,cat:"noodles",note:"台灣表吐司約91"},
+  {name:"全麥麵包",en:"Wholemeal Bread",gi:50,gl:12,cat:"noodles",note:"台灣表約50"},
+  {name:"饅頭",en:"Steamed Bun",gi:88,gl:20,cat:"noodles"},
+  {name:"番薯",en:"Sweet Potato",gi:55,gl:13,cat:"root",note:"台灣表甘藷約55"},
+  {name:"馬鈴薯",en:"Potato",gi:90,gl:15,cat:"root",note:"台灣表約90"},
+  {name:"芋頭",en:"Taro",gi:64,gl:12,cat:"root",note:"台灣表約64"},
+  {name:"淮山",en:"Chinese Yam",gi:75,gl:10,cat:"root",note:"台灣表山藥約75"},
+  {name:"紅蘿蔔",en:"Carrot",gi:80,gl:3,cat:"root",note:"台灣表約80（熟）"},
+  {name:"南瓜",en:"Pumpkin",gi:65,gl:7,cat:"root",note:"台灣表約65"},
+  {name:"粟米",en:"Corn",gi:70,gl:15,cat:"root",note:"台灣表玉米約70"},
+  {name:"蓮藕",en:"Lotus Root",gi:40,gl:8,cat:"root"},
+  {name:"西蘭花",en:"Broccoli",gi:15,gl:1,cat:"veg"},
+  {name:"菜心",en:"Choy Sum",gi:15,gl:1,cat:"veg"},
+  {name:"芥蘭",en:"Gai Lan",gi:15,gl:1,cat:"veg"},
+  {name:"菠菜",en:"Spinach",gi:15,gl:1,cat:"veg"},
+  {name:"白菜",en:"Bok Choy",gi:15,gl:1,cat:"veg"},
+  {name:"生菜",en:"Lettuce",gi:15,gl:1,cat:"veg"},
+  {name:"青瓜",en:"Cucumber",gi:15,gl:1,cat:"veg"},
+  {name:"番茄",en:"Tomato",gi:15,gl:2,cat:"veg"},
+  {name:"節瓜",en:"Hairy Melon",gi:15,gl:1,cat:"veg"},
+  {name:"冬瓜",en:"Winter Melon",gi:15,gl:1,cat:"veg"},
+  {name:"苦瓜",en:"Bitter Melon",gi:15,gl:1,cat:"veg"},
+  {name:"茄子",en:"Eggplant",gi:15,gl:2,cat:"veg"},
+  {name:"秋葵",en:"Okra",gi:20,gl:2,cat:"veg"},
+  {name:"西洋菜",en:"Watercress",gi:15,gl:1,cat:"veg"},
+  {name:"通菜",en:"Water Spinach",gi:15,gl:1,cat:"veg"},
+  {name:"豆苗",en:"Pea Shoots",gi:15,gl:1,cat:"veg"},
+  {name:"金針菇",en:"Enoki",gi:15,gl:1,cat:"veg"},
+  {name:"香菇",en:"Shiitake",gi:15,gl:1,cat:"veg"},
+  {name:"木耳",en:"Wood Ear",gi:15,gl:1,cat:"veg"},
+  {name:"青椒",en:"Green Pepper",gi:15,gl:1,cat:"veg"},
+  {name:"紅椒",en:"Red Pepper",gi:15,gl:1,cat:"veg"},
+  {name:"豆芽",en:"Bean Sprouts",gi:25,gl:2,cat:"veg"},
+  {name:"四季豆",en:"Green Beans",gi:30,gl:3,cat:"veg"},
+  {name:"荷蘭豆",en:"Snow Peas",gi:25,gl:2,cat:"veg"},
+  {name:"西瓜",en:"Watermelon",gi:72,gl:4,cat:"fruit"},
+  {name:"荔枝",en:"Lychee",gi:79,gl:8,cat:"fruit"},
+  {name:"芒果",en:"Mango",gi:51,gl:8,cat:"fruit"},
+  {name:"香蕉",en:"Banana",gi:55,gl:12,cat:"fruit",note:"台灣表約55"},
+  {name:"菠蘿",en:"Pineapple",gi:66,gl:6,cat:"fruit"},
+  {name:"提子",en:"Grapes",gi:59,gl:11,cat:"fruit"},
+  {name:"火龍果",en:"Dragon Fruit",gi:48,gl:6,cat:"fruit"},
+  {name:"奇異果",en:"Kiwi",gi:50,gl:7,cat:"fruit"},
+  {name:"蘋果",en:"Apple",gi:38,gl:6,cat:"fruit"},
+  {name:"梨",en:"Pear",gi:38,gl:4,cat:"fruit"},
+  {name:"橙",en:"Orange",gi:42,gl:5,cat:"fruit"},
+  {name:"柚子",en:"Pomelo",gi:25,gl:3,cat:"fruit"},
+  {name:"士多啤梨",en:"Strawberry",gi:40,gl:1,cat:"fruit"},
+  {name:"藍莓",en:"Blueberry",gi:53,gl:5,cat:"fruit"},
+  {name:"車厘子",en:"Cherry",gi:22,gl:3,cat:"fruit"},
+  {name:"木瓜",en:"Papaya",gi:60,gl:9,cat:"fruit"},
+  {name:"檸檬",en:"Lemon",gi:20,gl:1,cat:"fruit"},
+  {name:"牛油果",en:"Avocado",gi:10,gl:1,cat:"fruit"},
+  {name:"豆腐",en:"Tofu",gi:15,gl:2,cat:"soy"},
+  {name:"嫩豆腐",en:"Soft Tofu",gi:15,gl:2,cat:"soy"},
+  {name:"豆腐乾",en:"Dried Tofu",gi:15,gl:2,cat:"soy"},
+  {name:"豆腐卜",en:"Fried Tofu",gi:15,gl:2,cat:"soy"},
+  {name:"腐竹",en:"Bean Curd Stick",gi:15,gl:2,cat:"soy"},
+  {name:"豆漿",en:"Soy Milk",gi:30,gl:4,cat:"soy"},
+  {name:"黃豆",en:"Soybeans",gi:15,gl:2,cat:"soy"},
+  {name:"綠豆",en:"Mung Beans",gi:38,gl:7,cat:"soy"},
+  {name:"紅豆",en:"Red Beans",gi:45,gl:10,cat:"soy"},
+  {name:"扁豆",en:"Lentils",gi:32,gl:6,cat:"soy"},
+  {name:"鷹嘴豆",en:"Chickpeas",gi:28,gl:8,cat:"soy"},
+  {name:"雞蛋",en:"Egg",gi:0,gl:0,cat:"dairyegg"},
+  {name:"全脂牛奶",en:"Whole Milk",gi:31,gl:4,cat:"dairyegg"},
+  {name:"低脂牛奶",en:"Low-fat Milk",gi:32,gl:4,cat:"dairyegg"},
+  {name:"無糖乳酪",en:"Plain Yogurt",gi:36,gl:4,cat:"dairyegg"},
+  {name:"芝士",en:"Cheese",gi:0,gl:0,cat:"dairyegg"},
+  {name:"雞胸肉",en:"Chicken Breast",gi:0,gl:0,cat:"meat"},
+  {name:"豬肉（瘦）",en:"Lean Pork",gi:0,gl:0,cat:"meat"},
+  {name:"牛肉（瘦）",en:"Lean Beef",gi:0,gl:0,cat:"meat"},
+  {name:"羊肉",en:"Lamb",gi:0,gl:0,cat:"meat"},
+  {name:"魚肉",en:"Fish",gi:0,gl:0,cat:"seafood"},
+  {name:"蝦",en:"Shrimp",gi:0,gl:0,cat:"seafood"},
+  {name:"蟹",en:"Crab",gi:0,gl:0,cat:"seafood"},
+  {name:"帶子",en:"Scallop",gi:0,gl:0,cat:"seafood"},
+  {name:"花生",en:"Peanuts",gi:14,gl:1,cat:"nut"},
+  {name:"杏仁",en:"Almonds",gi:15,gl:1,cat:"nut"},
+  {name:"核桃",en:"Walnuts",gi:15,gl:1,cat:"nut"},
+  {name:"芝麻",en:"Sesame",gi:35,gl:3,cat:"nut"},
+  {name:"綠茶",en:"Green Tea",gi:0,gl:0,cat:"drink"},
+  {name:"水",en:"Water",gi:0,gl:0,cat:"drink"},
+  {name:"白糖",en:"Sugar",gi:65,gl:10,cat:"other"},
+  {name:"蜜糖",en:"Honey",gi:58,gl:10,cat:"other"},
+  {name:"橄欖油",en:"Olive Oil",gi:0,gl:0,cat:"other"}
+];
+
+let currentGI = 'all';
+let currentCat = 'all';
+
+function getGIClass(gi) {
+  if (gi <= 55) return 'low';
+  if (gi <= 69) return 'med';
+  return 'high';
+}
+function getGLLabel(gl) {
+  if (gl <= 10) return '低GL';
+  if (gl <= 19) return '中GL';
+  return '高GL';
+}
+function setGI(gi) {
+  currentGI = gi;
+  document.querySelectorAll('#giButtons .btn').forEach(b => b.classList.remove('active'));
+  document.querySelector(`#giButtons .btn[data-gi="${gi}"]`).classList.add('active');
+  filterFoods();
+}
+function setCat(cat) {
+  currentCat = cat;
+  document.querySelectorAll('#catButtons .btn').forEach(b => b.classList.remove('active'));
+  document.querySelector(`#catButtons .btn[data-cat="${cat}"]`).classList.add('active');
+  filterFoods();
+}
+function filterFoods() {
+  const q = document.getElementById('search').value.toLowerCase();
+  let filtered = foods.filter(f => {
+    const matchText = f.name.toLowerCase().includes(q) || (f.en && f.en.toLowerCase().includes(q));
+    const matchCat = currentCat === 'all' || f.cat === currentCat;
+    const giClass = getGIClass(f.gi);
+    const matchGI = currentGI === 'all' || giClass === currentGI;
+    return matchText && matchCat && matchGI;
+  });
+  filtered.sort((a, b) => b.gi - a.gi);
+  renderFoods(filtered);
+}
+function renderFoods(list) {
+  const grid = document.getElementById('foodGrid');
+  document.getElementById('count').textContent = `顯示 ${list.length} 項食物（由高 GI 到低 GI）`;
+  if (currentCat !== 'all') {
+    grid.innerHTML = list.map(f => renderCard(f)).join('');
+    return;
+  }
+  const groups = {};
+  list.forEach(f => {
+    if (!groups[f.cat]) groups[f.cat] = [];
+    groups[f.cat].push(f);
+  });
+  let html = '';
+  Object.keys(catNames).forEach(cat => {
+    if (groups[cat] && groups[cat].length > 0) {
+      html += `<div class="section-title">${catNames[cat]}</div>`;
+      html += groups[cat].map(f => renderCard(f)).join('');
+    }
+  });
+  grid.innerHTML = html;
+}
+function renderCard(f) {
+  const giClass = getGIClass(f.gi);
+  return `
+    <div class="card ${giClass}">
+      <div class="category">${catNames[f.cat] || f.cat}</div>
+      <div class="food-name">${f.name}</div>
+      <div class="food-en">${f.en || ''}</div>
+      <div class="metrics">
+        <span class="badge gi-badge ${giClass}">GI ${f.gi}</span>
+        <span class="badge gl-badge">${getGLLabel(f.gl)} ${f.gl}</span>
+      </div>
+      ${f.note ? `<div class="note">${f.note}</div>` : ''}
+    </div>
+  `;
+}
+
+// ========== DINNER RECIPES (low-GI Chinese, tagged for protein) ==========
+const dinnerRecipes = [
+  {name:"清蒸魚", protein:true, ingredients:["魚 1條（約500g）","薑絲 適量","蔥 1條","生抽 1茶匙","麻油 少許"], steps:["魚洗淨，身上劃刀","放薑絲蔥段","大火蒸8-10分鐘","淋生抽與麻油"]},
+  {name:"白灼菜心", protein:false, ingredients:["菜心 300g","蒜","鹽","橄欖油"], steps:["滾水加鹽油焯菜心","蒜蓉爆香","拌勻"]},
+  {name:"蒜蓉西蘭花", protein:false, ingredients:["西蘭花 1棵","蒜","鹽","橄欖油"], steps:["西蘭花掰小朵","焯水","蒜蓉炒"]},
+  {name:"番茄炒蛋", protein:true, ingredients:["番茄 2個","雞蛋 3隻","蔥 少許","鹽 少許","糖 少許（可選）","油 1茶匙"], steps:["蛋打散加鹽炒熟盛起","番茄炒出汁","回鍋拌勻"]},
+  {name:"苦瓜炒蛋", protein:true, ingredients:["苦瓜 1條","雞蛋 3隻"], steps:["苦瓜切片","蛋炒熟","與苦瓜同炒"]},
+  {name:"清炒芥蘭", protein:false, ingredients:["芥蘭 300g","蒜","生抽少許"], steps:["芥蘭切段焯水","蒜蓉快炒"]},
+  {name:"豆苗蒜蓉", protein:false, ingredients:["豆苗 200g","蒜","鹽"], steps:["蒜爆香","下豆苗快炒至軟"]},
+  {name:"蒸水蛋", protein:true, ingredients:["雞蛋 3隻","溫水","鹽"], steps:["蛋打散加溫水","蒸8-10分鐘"]},
+  {name:"豆腐蒸蛋", protein:true, ingredients:["嫩豆腐 1盒","雞蛋 2隻","蝦仁少許"], steps:["豆腐壓碎","加蛋液蒸熟"]},
+  {name:"蒜蓉粉絲蒸扇貝", protein:true, ingredients:["扇貝 6隻","粉絲","蒜","薑"], steps:["粉絲泡軟","蒜蓉鋪上","蒸5分鐘"]},
+  {name:"白灼蝦", protein:true, ingredients:["蝦 300g","薑片 3片","蔥 1條","生抽 1茶匙","蒜蓉 少許"], steps:["滾水加薑蔥焯蝦至變色","蘸生抽蒜蓉"]},
+  {name:"清蒸豆腐", protein:true, ingredients:["豆腐 1磚","豉油","蔥花"], steps:["豆腐切片","蒸5分鐘","淋豉油"]},
+  {name:"番茄豆腐湯", protein:true, ingredients:["番茄 2個","豆腐 1磚","蛋"], steps:["番茄炒出汁","加水煮","下豆腐與蛋"]},
+  {name:"冬瓜瘦肉湯", protein:true, ingredients:["冬瓜 300g","瘦豬肉 200g","薑"], steps:["瘦肉焯水","與冬瓜同煮"]},
+  {name:"西洋菜豬骨湯", protein:true, ingredients:["西洋菜 200g","豬骨 200g","紅棗"], steps:["豬骨焯水","與西洋菜同煮"]},
+  {name:"菠菜豆腐湯", protein:true, ingredients:["菠菜 150g","豆腐","蛋花"], steps:["豆腐煮開","下菠菜與蛋花"]},
+  {name:"青椒炒牛肉", protein:true, ingredients:["牛肉片 250g","青椒 2個","蒜"], steps:["牛肉醃","快炒青椒後下牛肉"]},
+  {name:"西芹炒蝦仁", protein:true, ingredients:["蝦仁 250g","西芹 2條"], steps:["西芹切段","快炒蝦仁"]},
+  {name:"西蘭花炒蝦", protein:true, ingredients:["西蘭花","蝦 200g"], steps:["焯西蘭花","與蝦同炒"]},
+  {name:"蒜蓉蒸茄子", protein:false, ingredients:["茄子 2條","蒜","豉油"], steps:["茄子切開","蒜蓉蒸熟"]},
+  {name:"清炒節瓜", protein:false, ingredients:["節瓜 1條","蒜","蛋花"], steps:["節瓜切片","炒熟加蛋花"]},
+  {name:"木耳炒蛋", protein:true, ingredients:["木耳 50g","雞蛋 3隻"], steps:["木耳泡發","與蛋同炒"]},
+  {name:"金針菇炒蛋", protein:true, ingredients:["金針菇 1包","雞蛋 3隻"], steps:["金針菇切段","炒蛋"]},
+  {name:"蒜蓉通菜", protein:false, ingredients:["通菜 300g","蒜","豆豉"], steps:["通菜焯水","蒜豆豉快炒"]},
+  {name:"白菜粉絲湯", protein:false, ingredients:["白菜 200g","粉絲","蝦皮"], steps:["白菜煮軟","下粉絲"]},
+  {name:"番茄牛展（少糖）", protein:true, ingredients:["牛展 300g","番茄 3個","洋蔥"], steps:["牛展先煮軟","番茄炒出汁同煮"]},
+  {name:"清蒸雞（去皮）", protein:true, ingredients:["雞半隻（去皮）","薑蔥"], steps:["去皮","薑蔥蒸熟"]},
+  {name:"蒜香芥蘭炒牛肉", protein:true, ingredients:["芥蘭","牛肉片 200g","蒜"], steps:["分別焯炒後混合"]},
+  {name:"秋葵炒蛋", protein:true, ingredients:["秋葵 150g","雞蛋 3隻"], steps:["秋葵切片","炒蛋"]},
+  {name:"豆芽炒肉絲", protein:true, ingredients:["豆芽 200g","瘦肉絲 150g"], steps:["肉絲先炒","下豆芽快炒"]},
+  {name:"蒸淮山（少量）", protein:false, ingredients:["淮山 100g（少量）","蒜 少許"], steps:["淮山去皮切片蒸熟","因台灣表GI約75，建議少量並搭配蛋白質"]},
+  {name:"蒸芋頭（少量）", protein:false, ingredients:["芋頭 100g（少量）"], steps:["芋頭去皮切塊蒸熟放涼","因台灣表GI約64，建議少量替換主食"]},
+  {name:"涼拌木耳", protein:false, ingredients:["木耳","蒜","醋","豉油"], steps:["木耳泡發焯水","拌調味"]},
+  {name:"涼拌青瓜", protein:false, ingredients:["青瓜 2條","蒜","醋"], steps:["青瓜拍碎","拌味"]},
+  {name:"蒜蓉蒸蝦", protein:true, ingredients:["蝦 300g","蒜","粉絲"], steps:["蒜蓉鋪上蒸熟"]},
+  {name:"清炒菜心", protein:false, ingredients:["菜心 300g","蒜"], steps:["快炒至軟"]},
+  {name:"蛋花菠菜湯", protein:true, ingredients:["菠菜","蛋 2隻","鹽"], steps:["菠菜煮開","打蛋花"]},
+  {name:"豆腐蒸蝦", protein:true, ingredients:["豆腐","蝦仁 150g","蒜"], steps:["豆腐鋪蝦蒸熟"]},
+  {name:"苦瓜瘦肉湯", protein:true, ingredients:["苦瓜","瘦豬肉 200g"], steps:["同煮至軟"]},
+  {name:"番茄蛋湯", protein:true, ingredients:["番茄","蛋 2隻","蔥"], steps:["番茄煮汁","打蛋花"]},
+  {name:"清炒豆苗", protein:false, ingredients:["豆苗 200g","蒜"], steps:["快炒即可"]},
+  {name:"蒸蛋羹", protein:true, ingredients:["雞蛋 4隻","溫水"], steps:["蒸至凝固"]},
+  {name:"蒜香西蘭花", protein:false, ingredients:["西蘭花","蒜","橄欖油"], steps:["焯後快炒"]},
+  {name:"西芹百合", protein:false, ingredients:["西芹","鮮百合"], steps:["快炒"]},
+  {name:"木耳炒肉絲", protein:true, ingredients:["木耳","瘦肉絲 150g"], steps:["快炒"]},
+  {name:"金針菇豆腐湯", protein:true, ingredients:["金針菇","豆腐","蛋"], steps:["煮開下蛋花"]},
+  {name:"清蒸帶子", protein:true, ingredients:["帶子 8隻","薑蔥"], steps:["蒸3-4分鐘"]},
+  {name:"蒜蓉生菜", protein:false, ingredients:["生菜 200g","蒜"], steps:["快炒或焯拌"]},
+  {name:"番茄豆腐炒蛋", protein:true, ingredients:["番茄","豆腐","蛋 2隻"], steps:["分次炒後混合"]},
+  {name:"青椒炒豆腐", protein:true, ingredients:["青椒","豆腐","蒜"], steps:["豆腐可微煎或直接炒","與青椒快炒少油"]},
+  {name:"冬瓜蝦仁湯", protein:true, ingredients:["冬瓜","蝦仁 150g","薑"], steps:["冬瓜煮軟下蝦"]},
+  {name:"菠菜炒蛋", protein:true, ingredients:["菠菜","雞蛋 3隻"], steps:["蛋先炒再下菠菜"]},
+  {name:"白灼芥蘭", protein:false, ingredients:["芥蘭","蒜油"], steps:["焯水拌蒜油"]},
+  {name:"番茄炒豆腐", protein:true, ingredients:["番茄","豆腐"], steps:["番茄炒汁下豆腐"]},
+  {name:"蒸魚柳", protein:true, ingredients:["魚柳 400g","薑蔥"], steps:["蒸8分鐘"]},
+  {name:"蒜香通菜", protein:false, ingredients:["通菜","蒜"], steps:["快炒"]},
+  {name:"蛋花豆腐湯", protein:true, ingredients:["豆腐","蛋","蔥"], steps:["煮開打蛋花"]},
+  {name:"清炒秋葵", protein:false, ingredients:["秋葵","蒜"], steps:["快炒"]},
+  {name:"西蘭花炒牛肉", protein:true, ingredients:["西蘭花","牛肉片 200g"], steps:["快炒"]},
+  {name:"蒸蛋配蝦", protein:true, ingredients:["蛋","蝦仁 100g"], steps:["蒸熟"]},
+  {name:"蒜蓉菜心", protein:false, ingredients:["菜心","蒜"], steps:["焯後快炒"]},
+  {name:"番茄牛柳", protein:true, ingredients:["牛柳 200g","番茄"], steps:["快炒"]},
+  {name:"清炒豆芽", protein:false, ingredients:["豆芽","蒜"], steps:["快炒"]},
+  {name:"蒸豆腐配蔥", protein:true, ingredients:["豆腐","蔥豉油"], steps:["蒸後淋汁"]},
+  {name:"菠菜豆腐", protein:true, ingredients:["菠菜","豆腐"], steps:["快炒或煮湯"]},
+  {name:"蒜香芥蘭", protein:false, ingredients:["芥蘭","蒜"], steps:["焯炒"]},
+  {name:"清蒸雞胸", protein:true, ingredients:["雞胸 300g","薑蔥"], steps:["蒸熟"]},
+  {name:"金針菇炒蝦", protein:true, ingredients:["金針菇","蝦 150g"], steps:["快炒"]},
+  {name:"番茄蛋花湯", protein:true, ingredients:["番茄","蛋"], steps:["煮汁打蛋"]},
+  {name:"蒜蓉蒸魚", protein:true, ingredients:["魚","蒜"], steps:["蒸熟"]},
+  {name:"苦瓜炒肉片", protein:true, ingredients:["苦瓜","瘦肉 150g"], steps:["快炒"]},
+  {name:"冬瓜豆腐湯", protein:true, ingredients:["冬瓜","豆腐"], steps:["煮軟"]},
+  {name:"清炒西蘭花", protein:false, ingredients:["西蘭花","蒜"], steps:["快炒"]},
+  {name:"蒜香菠菜", protein:false, ingredients:["菠菜","蒜"], steps:["快炒"]},
+  {name:"清蒸蝦", protein:true, ingredients:["蝦 250g","薑"], steps:["蒸熟"]},
+  {name:"芥蘭炒肉絲", protein:true, ingredients:["芥蘭","肉絲 150g"], steps:["快炒"]},
+  {name:"清炒通菜", protein:false, ingredients:["通菜","蒜"], steps:["快炒"]},
+  {name:"蛋花湯", protein:true, ingredients:["蛋 2隻","蔥"], steps:["打蛋花"]},
+  {name:"蒜蓉豆苗", protein:false, ingredients:["豆苗","蒜"], steps:["快炒"]},
+  {name:"清蒸龍利魚", protein:true, ingredients:["龍利魚 400g","薑絲","蔥","生抽 1茶匙"], steps:["魚洗淨","放薑蔥蒸8分鐘","淋生抽"]},
+  {name:"蒜香菠菜炒蛋", protein:true, ingredients:["菠菜 200g","雞蛋 3隻","蒜","鹽"], steps:["蛋炒熟","菠菜蒜炒後混合"]},
+  {name:"白灼西洋菜", protein:false, ingredients:["西洋菜 250g","蒜","鹽"], steps:["焯水","蒜油拌"]},
+  {name:"番茄炒蝦仁", protein:true, ingredients:["蝦仁 200g","番茄 2個","蔥"], steps:["蝦仁快炒","番茄炒汁混合"]},
+  {name:"清炒白菜", protein:false, ingredients:["白菜 300g","蒜","鹽"], steps:["快炒至軟"]},
+  {name:"蒸蛋配金針菇", protein:true, ingredients:["雞蛋 3隻","金針菇 1包","鹽"], steps:["蛋液加金針菇蒸熟"]},
+  {name:"蒜蓉蒸豆腐", protein:true, ingredients:["豆腐 1磚","蒜蓉","生抽"], steps:["豆腐蒸5分鐘","淋蒜蓉生抽"]},
+  {name:"西蘭花炒雞胸", protein:true, ingredients:["雞胸 200g","西蘭花 1棵","蒜"], steps:["雞胸切片快炒","與西蘭花混合"]},
+  {name:"清炒豆苗配蛋", protein:true, ingredients:["豆苗 150g","雞蛋 2隻","蒜"], steps:["蛋炒熟後下豆苗"]},
+  {name:"白灼芥蘭配蒜油", protein:false, ingredients:["芥蘭 300g","蒜油","鹽"], steps:["焯水拌蒜油"]},
+  {name:"番茄豆腐蒸蛋", protein:true, ingredients:["番茄 1個","豆腐","雞蛋 2隻"], steps:["混合蒸熟"]},
+  {name:"蒜香通菜炒肉絲", protein:true, ingredients:["通菜 200g","瘦肉絲 100g","蒜"], steps:["肉絲先炒再下通菜"]},
+  {name:"清蒸帶子配薑蔥", protein:true, ingredients:["帶子 8隻","薑蔥"], steps:["蒸3分鐘"]},
+  {name:"涼拌青瓜配木耳", protein:false, ingredients:["青瓜 2條","木耳","蒜醋"], steps:["焯木耳","青瓜拍碎拌味"]},
+  {name:"菠菜豆腐炒蛋", protein:true, ingredients:["菠菜","豆腐","蛋 2隻"], steps:["分次炒後混合"]},
+  {name:"蒜蓉蒸茄子配蔥", protein:false, ingredients:["茄子 2條","蒜蓉","蔥"], steps:["蒸熟淋蒜"]},
+  {name:"清炒秋葵配蝦", protein:true, ingredients:["秋葵 150g","蝦 100g","蒜"], steps:["快炒"]},
+  {name:"蒸雞胸配西蘭花", protein:true, ingredients:["雞胸 250g","西蘭花","薑"], steps:["分別蒸熟後混合"]},
+  {name:"番茄蛋花豆腐湯", protein:true, ingredients:["番茄","豆腐","蛋"], steps:["煮汁下豆腐打蛋花"]},
+  {name:"白灼菜心配蒜蓉", protein:false, ingredients:["菜心 300g","蒜蓉"], steps:["焯水拌蒜蓉"]},
+  {name:"蒜香芥蘭炒蝦", protein:true, ingredients:["芥蘭","蝦 150g","蒜"], steps:["快炒"]},
+  {name:"清炒節瓜配蛋花", protein:true, ingredients:["節瓜 1條","蛋 1隻","蒜"], steps:["炒軟加蛋花"]},
+  {name:"蒸豆腐配蝦仁", protein:true, ingredients:["豆腐","蝦仁 100g","蔥"], steps:["蒸熟"]},
+  {name:"涼拌木耳配青瓜", protein:false, ingredients:["木耳","青瓜","醋蒜"], steps:["焯後拌"]},
+  {name:"金針菇炒蛋配肉絲", protein:true, ingredients:["金針菇","蛋","肉絲 80g"], steps:["分次炒混合"]},
+  {name:"清炒豆芽配肉絲", protein:true, ingredients:["豆芽 200g","肉絲 100g"], steps:["快炒"]},
+  {name:"蒜蓉蒸魚柳", protein:true, ingredients:["魚柳 350g","蒜蓉","薑"], steps:["蒸8分鐘"]},
+  {name:"白灼菠菜", protein:false, ingredients:["菠菜 200g","蒜油"], steps:["焯水拌"]},
+  {name:"番茄炒豆腐配蔥", protein:true, ingredients:["番茄","豆腐","蔥"], steps:["炒汁下豆腐"]},
+  {name:"蒸水蛋配蝦皮", protein:true, ingredients:["蛋 3隻","蝦皮","蔥"], steps:["蒸熟"]},
+  {name:"蒜香西蘭花炒牛肉", protein:true, ingredients:["西蘭花","牛肉片 150g","蒜"], steps:["快炒"]},
+  {name:"清炒通菜配蒜豆豉", protein:false, ingredients:["通菜 250g","蒜","豆豉"], steps:["快炒"]},
+  {name:"豆腐蒸蛋配番茄", protein:true, ingredients:["豆腐","蛋","番茄"], steps:["蒸熟"]},
+  {name:"白灼芥蘭配肉絲", protein:true, ingredients:["芥蘭","肉絲 100g"], steps:["焯後快炒"]},
+  {name:"蒜蓉生菜炒蛋", protein:true, ingredients:["生菜","蛋 2隻","蒜"], steps:["快炒"]},
+  {name:"清蒸蝦配薑蔥", protein:true, ingredients:["蝦 250g","薑蔥"], steps:["蒸熟"]},
+  {name:"番茄牛柳配西蘭花", protein:true, ingredients:["牛柳 150g","番茄","西蘭花"], steps:["快炒"]},
+  {name:"蒸蛋羹配金針菇", protein:true, ingredients:["蛋 3隻","金針菇"], steps:["蒸熟"]},
+  {name:"蒜香菠菜豆腐", protein:true, ingredients:["菠菜","豆腐","蒜"], steps:["快炒"]},
+  {name:"清炒秋葵配蛋", protein:true, ingredients:["秋葵","蛋 2隻"], steps:["快炒"]},
+  {name:"白灼菜心配肉片", protein:true, ingredients:["菜心","瘦肉片 100g"], steps:["焯後快炒"]},
+  {name:"蒜蓉蒸茄子配肉絲", protein:true, ingredients:["茄子","肉絲 80g","蒜"], steps:["蒸熟"]},
+  {name:"清炒豆苗配豆腐", protein:true, ingredients:["豆苗","豆腐","蒜"], steps:["快炒"]},
+  {name:"蒸雞胸配番茄", protein:true, ingredients:["雞胸 200g","番茄","薑"], steps:["蒸熟"]},
+  {name:"蒜香通菜炒蛋", protein:true, ingredients:["通菜","蛋 2隻","蒜"], steps:["快炒"]},
+  {name:"清蒸帶子配蒜蓉", protein:true, ingredients:["帶子 6隻","蒜蓉"], steps:["蒸熟"]},
+  {name:"番茄豆腐炒蝦", protein:true, ingredients:["番茄","豆腐","蝦 100g"], steps:["快炒"]},
+  {name:"白灼西洋菜配蛋花", protein:true, ingredients:["西洋菜","蛋花"], steps:["焯後加蛋花"]},
+  {name:"蒜蓉芥蘭炒豆腐", protein:true, ingredients:["芥蘭","豆腐","蒜"], steps:["快炒"]},
+  {name:"清炒節瓜配肉絲", protein:true, ingredients:["節瓜","肉絲 100g"], steps:["快炒"]},
+  {name:"蒸水蛋配番茄", protein:true, ingredients:["蛋 3隻","番茄","鹽"], steps:["蒸熟"]},
+  {name:"蒜香西蘭花配蝦仁", protein:true, ingredients:["西蘭花","蝦仁 150g"], steps:["快炒"]},
+  {name:"清炒白菜配豆腐", protein:true, ingredients:["白菜","豆腐","蒜"], steps:["快炒"]},
+  {name:"白灼菠菜配肉絲", protein:true, ingredients:["菠菜","肉絲 80g"], steps:["焯後快炒"]},
+  {name:"番茄炒蛋配金針菇", protein:true, ingredients:["番茄","蛋","金針菇"], steps:["快炒"]},
+  {name:"蒜蓉蒸豆腐配蔥花", protein:true, ingredients:["豆腐","蒜蓉","蔥花"], steps:["蒸熟"]},
+  {name:"清蒸魚配西洋菜", protein:true, ingredients:["魚 400g","西洋菜","薑蔥"], steps:["蒸熟"]},
+  {name:"蒜香豆苗炒蝦", protein:true, ingredients:["豆苗","蝦 100g","蒜"], steps:["快炒"]},
+  {name:"清炒秋葵配豆腐", protein:true, ingredients:["秋葵","豆腐","蒜"], steps:["快炒"]},
+  {name:"蒸雞胸配芥蘭", protein:true, ingredients:["雞胸 200g","芥蘭","薑"], steps:["分別蒸後混合"]},
+  {name:"白灼菜心配蛋花", protein:true, ingredients:["菜心","蛋花"], steps:["焯後加蛋花"]},
+  {name:"蒜蓉通菜配豆腐", protein:true, ingredients:["通菜","豆腐","蒜"], steps:["快炒"]},
+  {name:"清蒸蝦配西蘭花", protein:true, ingredients:["蝦 200g","西蘭花","薑"], steps:["蒸熟"]},
+  {name:"番茄豆腐湯配蛋花", protein:true, ingredients:["番茄","豆腐","蛋花"], steps:["煮湯"]},
+  {name:"蒜香芥蘭配肉片", protein:true, ingredients:["芥蘭","肉片 100g","蒜"], steps:["快炒"]},
+  {name:"清炒節瓜配蝦仁", protein:true, ingredients:["節瓜","蝦仁 100g"], steps:["快炒"]},
+  {name:"蒸蛋配木耳", protein:true, ingredients:["蛋 3隻","木耳","鹽"], steps:["蒸熟"]},
+  {name:"白灼菠菜配豆腐", protein:true, ingredients:["菠菜","豆腐"], steps:["焯後混合"]},
+  {name:"蒜蓉蒸魚配金針菇", protein:true, ingredients:["魚柳 300g","金針菇","蒜"], steps:["蒸熟"]},
+  {name:"清炒豆芽配豆腐", protein:true, ingredients:["豆芽","豆腐","蒜"], steps:["快炒"]},
+  {name:"番茄牛展配菜心", protein:true, ingredients:["牛展 150g","番茄","菜心"], steps:["快炒"]},
+  {name:"蒜香西蘭花配蛋", protein:true, ingredients:["西蘭花","蛋 2隻"], steps:["快炒"]},
+  {name:"清蒸雞胸配西洋菜", protein:true, ingredients:["雞胸 200g","西洋菜","薑"], steps:["蒸熟"]},
+  {name:"白灼芥蘭配豆腐", protein:true, ingredients:["芥蘭","豆腐"], steps:["焯後混合"]},
+  {name:"蒜蓉通菜炒肉絲", protein:true, ingredients:["通菜","肉絲 100g","蒜"], steps:["快炒"]},
+  {name:"蒸水蛋配蝦仁", protein:true, ingredients:["蛋 3隻","蝦仁 50g"], steps:["蒸熟"]},
+  {name:"清炒秋葵配肉絲", protein:true, ingredients:["秋葵","肉絲 80g"], steps:["快炒"]},
+  {name:"蒜香菠菜炒豆腐", protein:true, ingredients:["菠菜","豆腐","蒜"], steps:["快炒"]},
+  {name:"白灼菜心配蝦", protein:true, ingredients:["菜心","蝦 100g"], steps:["焯後快炒"]},
+  {name:"番茄炒豆腐配蛋", protein:true, ingredients:["番茄","豆腐","蛋"], steps:["快炒"]},
+  {name:"清蒸帶子配西洋菜", protein:true, ingredients:["帶子 6隻","西洋菜","薑"], steps:["蒸熟"]},
+  {name:"蒜蓉芥蘭炒蛋", protein:true, ingredients:["芥蘭","蛋 2隻","蒜"], steps:["快炒"]},
+  {name:"清炒節瓜配豆腐", protein:true, ingredients:["節瓜","豆腐"], steps:["快炒"]},
+  {name:"蒸雞胸配金針菇", protein:true, ingredients:["雞胸 200g","金針菇"], steps:["蒸熟"]},
+  {name:"白灼菠菜配蛋花", protein:true, ingredients:["菠菜","蛋花"], steps:["焯後加蛋花"]},
+  {name:"蒜香豆苗炒肉絲", protein:true, ingredients:["豆苗","肉絲 80g","蒜"], steps:["快炒"]},
+  {name:"清蒸魚配西蘭花", protein:true, ingredients:["魚 350g","西蘭花","薑蔥"], steps:["蒸熟"]},
+  {name:"番茄蛋湯配豆腐", protein:true, ingredients:["番茄","蛋","豆腐"], steps:["煮湯"]},
+  {name:"蒜蓉通菜配蝦", protein:true, ingredients:["通菜","蝦 100g","蒜"], steps:["快炒"]},
+  {name:"清炒秋葵配蛋花", protein:true, ingredients:["秋葵","蛋花"], steps:["快炒"]},
+  {name:"蒸豆腐配金針菇", protein:true, ingredients:["豆腐","金針菇","蔥"], steps:["蒸熟"]},
+  {name:"白灼芥蘭配蝦仁", protein:true, ingredients:["芥蘭","蝦仁 100g"], steps:["焯後快炒"]},
+  {name:"蒜香菠菜炒肉絲", protein:true, ingredients:["菠菜","肉絲 80g","蒜"], steps:["快炒"]},
+  {name:"清炒菜心配豆腐", protein:true, ingredients:["菜心","豆腐"], steps:["快炒"]},
+  {name:"蒸水蛋配番茄丁", protein:true, ingredients:["蛋 3隻","番茄丁"], steps:["蒸熟"]},
+  {name:"蒜蓉蒸蝦配金針菇", protein:true, ingredients:["蝦 200g","金針菇","蒜"], steps:["蒸熟"]},
+  {name:"清炒豆苗配蛋花", protein:true, ingredients:["豆苗","蛋花"], steps:["快炒"]},
+  {name:"番茄炒雞胸", protein:true, ingredients:["雞胸 150g","番茄","蔥"], steps:["快炒"]},
+  {name:"白灼西洋菜配豆腐", protein:true, ingredients:["西洋菜","豆腐"], steps:["焯後混合"]},
+  {name:"蒜香芥蘭炒豆腐", protein:true, ingredients:["芥蘭","豆腐","蒜"], steps:["快炒"]},
+  {name:"清蒸魚柳配菜心", protein:true, ingredients:["魚柳 300g","菜心","薑"], steps:["蒸熟"]},
+  {name:"蒜蓉通菜炒蛋", protein:true, ingredients:["通菜","蛋 2隻","蒜"], steps:["快炒"]},
+  {name:"清炒節瓜配蛋", protein:true, ingredients:["節瓜","蛋 2隻"], steps:["快炒"]},
+  {name:"蒸雞胸配木耳", protein:true, ingredients:["雞胸 200g","木耳"], steps:["蒸熟"]},
+  {name:"白灼菠菜配蝦", protein:true, ingredients:["菠菜","蝦 80g"], steps:["焯後快炒"]},
+  {name:"蒜香豆苗炒豆腐", protein:true, ingredients:["豆苗","豆腐","蒜"], steps:["快炒"]},
+  {name:"清蒸帶子配芥蘭", protein:true, ingredients:["帶子 6隻","芥蘭","薑"], steps:["蒸熟"]},
+  {name:"番茄豆腐炒肉絲", protein:true, ingredients:["番茄","豆腐","肉絲 80g"], steps:["快炒"]},
+  {name:"蒜蓉蒸豆腐配金針菇", protein:true, ingredients:["豆腐","金針菇","蒜"], steps:["蒸熟"]},
+  {name:"清炒秋葵配蝦仁", protein:true, ingredients:["秋葵","蝦仁 100g"], steps:["快炒"]},
+  {name:"白灼菜心配豆腐", protein:true, ingredients:["菜心","豆腐"], steps:["焯後混合"]},
+  {name:"蒜香西蘭花炒蛋", protein:true, ingredients:["西蘭花","蛋 2隻"], steps:["快炒"]},
+  {name:"清蒸蝦配西洋菜", protein:true, ingredients:["蝦 200g","西洋菜","薑"], steps:["蒸熟"]},
+  {name:"番茄蛋花湯配金針菇", protein:true, ingredients:["番茄","蛋花","金針菇"], steps:["煮湯"]},
+  {name:"蒜蓉芥蘭配肉絲", protein:true, ingredients:["芥蘭","肉絲 100g","蒜"], steps:["快炒"]},
+  {name:"清炒節瓜配豆腐蛋", protein:true, ingredients:["節瓜","豆腐","蛋"], steps:["快炒"]},
+  {name:"蒸水蛋配木耳", protein:true, ingredients:["蛋 3隻","木耳"], steps:["蒸熟"]},
+  {name:"白灼菠菜配豆腐蛋", protein:true, ingredients:["菠菜","豆腐","蛋花"], steps:["焯後混合"]},
+  {name:"蒜香通菜炒豆腐", protein:true, ingredients:["通菜","豆腐","蒜"], steps:["快炒"]},
+  {name:"清蒸魚配金針菇", protein:true, ingredients:["魚 300g","金針菇","薑蔥"], steps:["蒸熟"]},
+  {name:"香茅鮮蝦湯", protein:true, ingredients:["蝦 200g","香茅 2根","番茄 1個","薑"], steps:["香茅拍碎煮水","下番茄蝦"]},
+  {name:"西蘭花炒帶子", protein:true, ingredients:["帶子 8隻","西蘭花 1棵","蒜","生抽少許"], steps:["帶子快炒","與西蘭花混合"]},
+  {name:"蘑菇炒雞胸", protein:true, ingredients:["雞胸 200g","鮮菇 150g","蒜","胡椒"], steps:["雞胸切片快炒菇"]},
+  {name:"豆腐蔬菜湯", protein:true, ingredients:["豆腐 1磚","白菜 200g","番茄","蛋花"], steps:["煮開下豆腐打蛋花"]},
+  {name:"四蔬炒瘦肉", protein:true, ingredients:["瘦肉絲 150g","菜心","西蘭花","金針菇","蒜"], steps:["肉絲先炒再下菜"]},
+  {name:"蒸三文魚配菜", protein:true, ingredients:["三文魚 300g","薑蔥","西蘭花"], steps:["蒸8分鐘配焯菜"]},
+  {name:"蒜蓉炒白菜", protein:false, ingredients:["白菜 300g","蒜","鹽"], steps:["快炒至軟"]},
+  {name:"香草三文魚", protein:true, ingredients:["三文魚 250g","迷迭香","檸檬","蒜"], steps:["少油煎或蒸"]},
+  {name:"菇菌炒雜菜", protein:false, ingredients:["香菇","金針菇","木耳","菜心","蒜"], steps:["快炒"]},
+  {name:"清蒸雞胸配西洋菜", protein:true, ingredients:["雞胸 250g","西洋菜 200g","薑"], steps:["分別蒸／焯後混合"]},
+  {name:"番茄香茅蝦湯", protein:true, ingredients:["蝦 200g","番茄 2個","香茅","薑"], steps:["煮湯"]},
+  {name:"蒸魚柳配芥蘭", protein:true, ingredients:["魚柳 350g","芥蘭","薑蔥"], steps:["蒸熟配焯芥蘭"]},
+  {name:"豆腐雜菜湯", protein:true, ingredients:["豆腐","白菜","金針菇","蛋花"], steps:["煮開"]},
+  {name:"蒜香雞胸炒西蘭花", protein:true, ingredients:["雞胸 200g","西蘭花","蒜"], steps:["快炒"]},
+  {name:"清炒西洋菜", protein:false, ingredients:["西洋菜 250g","蒜","鹽"], steps:["快炒"]},
+  {name:"蒸帶子配金針菇", protein:true, ingredients:["帶子 6隻","金針菇","蒜蓉"], steps:["蒸熟"]},
+  {name:"番茄豆腐湯配菜心", protein:true, ingredients:["番茄","豆腐","菜心","蛋花"], steps:["煮湯"]},
+  {name:"清蒸魚配菜心", protein:true, ingredients:["魚 400g","菜心","薑蔥"], steps:["蒸熟配焯菜心"]},
+  {name:"蒜蓉炒芥蘭", protein:false, ingredients:["芥蘭 300g","蒜","生抽少許"], steps:["焯後快炒"]},
+  {name:"雞胸炒金針菇", protein:true, ingredients:["雞胸 200g","金針菇 1包","蒜"], steps:["快炒"]},
+  {name:"白灼菜心配西洋菜", protein:false, ingredients:["菜心","西洋菜","蒜油"], steps:["焯水拌"]},
+  {name:"蒸蝦配西蘭花", protein:true, ingredients:["蝦 250g","西蘭花","薑"], steps:["蒸熟"]},
+  {name:"豆腐蒸蛋配金針菇", protein:true, ingredients:["豆腐","蛋 2隻","金針菇"], steps:["蒸熟"]},
+  {name:"清炒節瓜配肉絲", protein:true, ingredients:["節瓜","瘦肉絲 100g","蒜"], steps:["快炒"]},
+  {name:"番茄炒蛋配菠菜", protein:true, ingredients:["番茄","蛋 3隻","菠菜"], steps:["快炒"]},
+  {name:"蒜香魚柳", protein:true, ingredients:["魚柳 300g","蒜蓉","薑"], steps:["蒸熟"]},
+  {name:"清炒豆苗配蝦", protein:true, ingredients:["豆苗","蝦 100g","蒜"], steps:["快炒"]},
+  {name:"蒸雞胸配金針菇", protein:true, ingredients:["雞胸 200g","金針菇"], steps:["蒸熟"]},
+  {name:"白灼芥蘭配豆腐", protein:true, ingredients:["芥蘭","豆腐","蒜油"], steps:["焯後混合"]}
+];
+
+let lastSelected = [];
+
+function randomDinner() {
+  const proteinDishes = dinnerRecipes.filter(r => r.protein);
+  const vegDishes = dinnerRecipes.filter(r => !r.protein);
+  
+  const count = Math.random() > 0.3 ? 3 : 2;
+  let selected = [];
+  
+  // Always include at least 1-2 protein dishes for balance
+  const proteinCount = count === 3 ? (Math.random() > 0.5 ? 2 : 1) : 1;
+  const shuffledProtein = [...proteinDishes].sort(() => 0.5 - Math.random());
+  selected = selected.concat(shuffledProtein.slice(0, proteinCount));
+  
+  // Fill the rest with vegetables or mixed
+  const remaining = count - selected.length;
+  const pool = [...vegDishes, ...proteinDishes.filter(p => !selected.includes(p))];
+  const shuffledRest = pool.sort(() => 0.5 - Math.random());
+  selected = selected.concat(shuffledRest.slice(0, remaining));
+  
+  // Shuffle final order
+  selected.sort(() => 0.5 - Math.random());
+  lastSelected = selected;
+  
+  const container = document.getElementById('mealContainer');
+  document.getElementById('shoppingListContainer').style.display = 'none';
+  let html = `<h2 style="text-align:center; color:#0a58ca;">今晚推薦（3人份 · 營養均衡 · 較低脂肪）</h2>`;
+  selected.forEach((r, i) => {
+    const tag = r.protein ? '高蛋白' : '蔬菜';
+    html += `
+      <div class="dish">
+        <h3>${i+1}. ${r.name} <span style="font-size:0.8rem; color:#198754;">(${tag})</span></h3>
+        <div class="meta">低GI · 適合3人 · ${r.protein ? '提供優質蛋白質' : '豐富纖維'}</div>
+        <h4>材料（含調味）</h4>
+        <ul>${r.ingredients.map(ing => `<li>${ing}</li>`).join('')}</ul>
+        <h4>做法</h4>
+        <ol>${r.steps.map(s => `<li>${s}</li>`).join('')}</ol>
+      </div>
+    `;
+  });
+  html += `<p style="text-align:center; margin-top:12px; color:#6c757d;">建議搭配少量糙米（GI約56）或藜麥。已避免高GI食材（如烏冬、大量芋頭／淮山）。以上組合確保足夠優質蛋白質與蔬菜。</p>`;
+  container.innerHTML = html;
+}
+
+function generateShoppingList() {
+  if (!lastSelected || lastSelected.length === 0) {
+    alert('請先點擊「隨機推薦今晚晚餐」');
+    return;
+  }
+  const allIngredients = [];
+  lastSelected.forEach(r => {
+    r.ingredients.forEach(ing => allIngredients.push(ing));
+  });
+  
+  // Simple aggregation
+  const unique = [...new Set(allIngredients)];
+  
+  const container = document.getElementById('shoppingListContainer');
+  container.style.display = 'block';
+  let html = `<h2 style="text-align:center; color:#0a58ca;">購物清單（今晚推薦）</h2>`;
+  html += `<div class="dish"><h3>所需食材與調味料</h3><ul>`;
+  unique.forEach(ing => {
+    html += `<li>${ing}</li>`;
+  });
+  html += `</ul><p style="color:#6c757d; font-size:0.85rem;">份量已按3人估算。建議主食選少量糙米（GI約56），避免烏冬、大量芋頭／淮山等高GI食材。</p></div>`;
+  container.innerHTML = html;
+}
+
+// Init
+filterFoods();
+</script>
+</body>
+</html>
