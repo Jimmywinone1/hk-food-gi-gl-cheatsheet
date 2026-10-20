@@ -695,7 +695,6 @@ const dinnerRecipes = [
   {name:"日式煎蛋卷", protein:true, ingredients:["雞蛋 3隻", "鹽 少許", "油 少許"], steps:["蛋打散加鹽", "少油分次捲成蛋卷", "配青瓜醋漬"]},
   {name:"芝麻醬拌豬肉沙拉", protein:true, ingredients:["瘦豬肉片 150g", "生菜", "青瓜", "番茄", "芝麻醬 1茶匙", "醋 少許"], steps:["豬肉焯熟", "蔬菜洗淨", "拌芝麻醬醋"]},
   {name:"日式冷豆腐", protein:true, ingredients:["絹豆腐 1盒", "薑末", "鰹魚粉 少許", "生抽 少許", "蔥花"], steps:["豆腐冷藏後切塊", "淋生抽、撒薑末與鰹魚粉"]},
-  {name:"韓式生菜包牛肉", protein:true, ingredients:["瘦牛肉片 200g", "生菜葉", "蒜", "生抽 少許", "芝麻油 少許", "梨 少許（替代糖）"], steps:["牛肉用少許生抽與蒜醃", "快炒至熟", "用生菜葉包裹食用"]},
   {name:"韓式嫩豆腐鍋", protein:true, ingredients:["嫩豆腐 1盒", "瘦肉片 100g", "金針菇", "高麗菜", "蛋 1隻", "生抽與芝麻油 少許"], steps:["鍋中加水煮開", "下肉與菜", "加入豆腐打蛋花調味"]},
   {name:"韓式烤鯖魚", protein:true, ingredients:["鯖魚 1塊", "芝麻油 少許", "鹽 少許", "檸檬"], steps:["鯖魚抹少許芝麻油與鹽", "烤或煎至熟", "淋檸檬汁"]},
   {name:"花椰菜米韓式拌飯", protein:true, ingredients:["花椰菜米 200g", "雞柳或牛肉 150g", "蛋 1隻", "各種蔬菜", "生抽與芝麻油 少許"], steps:["肉類炒熟", "蔬菜分別焯或炒", "與花椰菜米混合", "配半熟蛋"]},
@@ -707,10 +706,22 @@ const dinnerRecipes = [
   {name:"日式烤魚配大根", protein:true, ingredients:["魚 1塊", "白蘿蔔 100g", "味噌 少許", "薑"], steps:["魚烤或煎熟", "白蘿蔔煮軟", "配味噌醬"]},
   {name:"韓式豆腐炒", protein:true, ingredients:["豆腐 1磚", "青椒", "蒜", "生抽 少許", "芝麻油 少許"], steps:["豆腐切塊少油煎", "下青椒蒜炒熟調味"]},
   {name:"日式海帶芽沙拉", protein:false, ingredients:["海帶芽", "青瓜", "醋", "芝麻", "鹽 少許"], steps:["海帶芽泡發", "與青瓜拌醋芝麻"]},
-  {name:"韓式烤雞柳生菜包", protein:true, ingredients:["雞柳 200g", "生菜葉", "蒜", "生抽 少許", "芝麻"], steps:["雞柳烤或煎熟切片", "用生菜包裹配蒜與生抽"]},
-]
-
-let lastSelected = [];
+  {name:"蘿蔔鯽魚湯", protein:true, ingredients:["鯽魚 2條", "白蘿蔔 200g", "蝦米 少許", "蔥薑", "鹽 少許"], steps:["鯽魚煎香", "與蘿蔔、蝦米同煮至軟", "調鹽即可"]},
+  {name:"番茄魚片", protein:true, ingredients:["魚片 300g", "番茄 2個", "蔥", "鹽 少許"], steps:["番茄炒出汁", "下魚片煮熟調味"]},
+  {name:"蝦米冬菇蒸肉餅", protein:true, ingredients:["瘦肉碎 250g", "冬菇 4隻", "蝦米 1湯匙", "蝦仁 少許"], steps:["冬菇泡發切粒", "與肉碎蝦米混合", "蒸15分鐘"]},
+  {name:"陳皮芫茜蒸牛肉餅", protein:true, ingredients:["牛肉碎 250g", "陳皮 少許", "芫茜 適量", "馬蹄 少許", "蝦仁 少許"], steps:["材料混合調味", "蒸熟即可"]},
+  {name:"木耳番茄肉醬", protein:true, ingredients:["牛番茄 2個", "黑木耳 100g", "瘦肉碎 150g", "洋蔥 少許", "蒜"], steps:["肉碎炒散", "下番茄與木耳炒至汁濃"]},
+  {name:"豆乾炒肉絲", protein:true, ingredients:["豆腐干 200g", "瘦肉絲 150g", "蒜", "蔥", "生抽 少許"], steps:["肉絲醃味快炒", "下豆腐干與蒜炒勻調味"]},
+  {name:"天貝炒番茄", protein:true, ingredients:["天貝 150g", "番茄 2個", "薑", "九層塔", "生抽 少許"], steps:["天貝切塊少油煎香", "下番茄炒出汁", "撒九層塔"]},
+  {name:"花生醬天貝", protein:true, ingredients:["天貝 150g", "花生醬 1茶匙", "生抽 少許", "蒜"], steps:["天貝煎香", "拌少許花生醬與生抽"]},
+  {name:"豆腐干炒青菜", protein:true, ingredients:["豆腐干 200g", "菜心或芥蘭 200g", "蒜", "生抽 少許"], steps:["豆腐干切條快炒", "下青菜炒熟調味"]},
+  {name:"蒸豆腐干配肉絲", protein:true, ingredients:["豆腐干 150g", "瘦肉絲 100g", "蒜", "蔥"], steps:["豆腐干與肉絲同蒸或快炒調味"]},
+  {name:"魚肉煎蛋", protein:true, ingredients:["魚滑 150g", "雞蛋 3隻", "蔥", "鹽 少許"], steps:["魚滑與蛋混合", "少油煎成蛋餅"]},
+  {name:"番茄豬柳", protein:true, ingredients:["豬柳 300g", "番茄 3個", "洋蔥 半個", "蔥薑蒜"], steps:["豬柳煎香", "下番茄洋蔥炒出汁調味"]},
+  {name:"清蒸魚配檸檬", protein:true, ingredients:["魚 1條", "檸檬 半個", "薑蔥", "生抽 少許"], steps:["魚放薑蔥檸檬", "蒸熟淋生抽"]},
+  {name:"豆腐蒸蛋", protein:true, ingredients:["豆腐 1磚", "雞蛋 2隻", "蝦仁 少許", "蔥"], steps:["豆腐壓碎加蛋液", "蒸熟撒蔥"]},
+  {name:"冬瓜瘦肉湯", protein:true, ingredients:["冬瓜 300g", "瘦肉 150g", "薑", "鹽"], steps:["瘦肉焯水與冬瓜同煮至軟"]},
+];
 
 function randomDinner() {
   const proteinDishes = dinnerRecipes.filter(r => r.protein);
